@@ -2,7 +2,7 @@ const AWS = require("aws-sdk");
 const Twitter = require("twitter-lite");
 
 // env
-const twitterUserName = "ysano";
+const twitterUserName = process.env.TWITTER_USER_NAME || "ysano";
 const region = "ap-northeast-1";
 const deliveryStreamName = "Twitter-Dashboard-Raw";
 const secretName = "TwitterAPI-Secrets";
