@@ -1,0 +1,14 @@
+[Unit]
+Description=Twitter Reader
+After=network.target
+
+[Service]
+Environment=TWITTER_USER_NAME=ysano
+Type=simple
+Restart=always
+User=ec2-user
+Group=ec2-user
+ExecStart=/home/ec2-user/environment/twitter_reader.sh
+
+[Install]
+WantedBy=multi-user.target
