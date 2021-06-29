@@ -6,6 +6,7 @@ After=network.target
 Environment=TWITTER_USER_NAME=ysano
 Type=simple
 Restart=always
+RestartSec=10
 User=ec2-user
 Group=ec2-user
 ExecStart=/home/ec2-user/environment/twitter_reader.sh
