@@ -23,7 +23,7 @@ async function putRecordToFirehose(tweet){
             Data: JSON.stringify(tweet) + '\n'
         }
     }
-    //console.log("putRecordToFirehose: " + JSON.stringify(tweet));
+    console.log("putRecordToFirehose: " + JSON.stringify(tweet.id));
     await firehose.putRecord(recordParams).promise();
 }
 
