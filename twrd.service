@@ -9,7 +9,7 @@ Restart=always
 RestartSec=10
 User=ec2-user
 Group=ec2-user
-ExecStart=/home/ec2-user/environment/twitter_reader.sh
+ExecStart=/home/ec2-user/twitter-dashboard/twitter_reader.sh
 
 [Install]
 WantedBy=multi-user.target
