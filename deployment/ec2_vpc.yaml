@@ -1,0 +1,92 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    EC2VPC:
+        Type: "AWS::EC2::VPC"
+        Properties:
+            CidrBlock: "10.193.0.0/16"
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            InstanceTenancy: "default"
+            Tags: 
+              - 
+                Key: "aws:cloudformation:stack-name"
+                Value: "Twitter-Dashboard-VPC"
+              - 
+                Key: "Name"
+                Value: "Twitter-Timeline-Dashboard"
+              - 
+                Key: "aws:cloudformation:stack-id"
+                Value: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/Twitter-Dashboard-VPC/dc78c400-d7d5-11eb-a585-0659521679dd"
+              - 
+                Key: "aws:cloudformation:logical-id"
+                Value: "VPC"
+
+    EC2Subnet:
+        Type: "AWS::EC2::Subnet"
+        Properties:
+            AvailabilityZone: !Sub "${AWS::Region}a"
+            CidrBlock: "10.193.10.0/24"
+            VpcId: !Ref EC2VPC
+            MapPublicIpOnLaunch: true
+            Tags: 
+              - 
+                Key: "Name"
+                Value: "Twitter-Timeline-Dashboard Public Subnet (AZ1)"
+
+    EC2InternetGateway:
+        Type: "AWS::EC2::InternetGateway"
+        Properties:
+            Tags: 
+              - 
+                Key: "aws:cloudformation:logical-id"
+                Value: "InternetGateway"
+              - 
+                Key: "Name"
+                Value: "Twitter-Timeline-Dashboard"
+              - 
+                Key: "aws:cloudformation:stack-id"
+                Value: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/Twitter-Dashboard-VPC/dc78c400-d7d5-11eb-a585-0659521679dd"
+              - 
+                Key: "aws:cloudformation:stack-name"
+                Value: "Twitter-Dashboard-VPC"
+
+    EC2RouteTable:
+        Type: "AWS::EC2::RouteTable"
+        Properties:
+            VpcId: !Ref EC2VPC
+            Tags: 
+              - 
+                Key: "aws:cloudformation:stack-id"
+                Value: !Sub "arn:aws:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/Twitter-Dashboard-VPC/dc78c400-d7d5-11eb-a585-0659521679dd"
+              - 
+                Key: "aws:cloudformation:logical-id"
+                Value: "PublicRouteTable"
+              - 
+                Key: "Name"
+                Value: "Twitter-Timeline-Dashboard Public Routes"
+              - 
+                Key: "aws:cloudformation:stack-name"
+                Value: "Twitter-Dashboard-VPC"
+
+    EC2Route:
+        Type: "AWS::EC2::Route"
+        Properties:
+            DestinationCidrBlock: "0.0.0.0/0"
+            GatewayId: !Ref EC2InternetGateway
+            RouteTableId: !Ref EC2RouteTable
+
+    EC2VPCGatewayAttachment:
+        Type: "AWS::EC2::VPCGatewayAttachment"
+        Properties:
+            InternetGatewayId: !Ref EC2InternetGateway
+            VpcId: !Ref EC2VPC
+
+    EC2SubnetRouteTableAssociation:
+        Type: "AWS::EC2::SubnetRouteTableAssociation"
+        Properties:
+            RouteTableId: !Ref EC2RouteTable
+            SubnetId: !Ref EC2Subnet
+

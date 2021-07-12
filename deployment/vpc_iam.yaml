@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    IAMInstanceProfile:
+        Type: "AWS::IAM::InstanceProfile"
+        Properties:
+            Path: "/"
+            InstanceProfileName: "Twitter-Dashboard-VPC-TwitterStreamingInstanceProfile-ERTEPW3A2A5U"
+            Roles: 
+              - !Ref IAMRole
+
+    IAMRole:
+        Type: "AWS::IAM::Role"
+        Properties:
+            Path: "/"
+            RoleName: "Twitter-Dashboard-VPC-SocialMediaAnalyticsEC2Role-1SMKNGKS35UQ5"
+            AssumeRolePolicyDocument: "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}"
+            MaxSessionDuration: 3600
+            Description: ""
+
+    IAMPolicy:
+        Type: "AWS::IAM::Policy"
+        Properties:
+            PolicyDocument: !Sub "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"firehose:DeleteDeliveryStream\",\"firehose:PutRecord\",\"firehose:PutRecordBatch\",\"firehose:UpdateDestination\"],\"Resource\":\"arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/Twitter-Dashboard-Raw\",\"Effect\":\"Allow\"},{\"Action\":[\"secretsmanager:GetSecretValue\"],\"Resource\":[\"arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:TwitterAPI-Secrets-3iUWaA\"],\"Effect\":\"Allow\"}]}"
+            Roles: 
+              - !Ref IAMRole
+            PolicyName: "socialmedia-policy"
+

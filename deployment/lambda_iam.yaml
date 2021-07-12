@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Metadata:
+    Generator: "former2"
+Description: ""
+Resources:
+    IAMManagedPolicy:
+        Type: "AWS::IAM::ManagedPolicy"
+        Properties:
+            ManagedPolicyName: "TweetAnalysisLambdaFuntionPolicy"
+            Path: "/"
+            PolicyDocument: !Sub |
+                {
+                    
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "s3:GetObject",
+                                "s3:PutObject",
+                                "s3:ListBucket",
+                                "s3:PutBucketNotification",
+                                "s3:DeleteBucket"
+                            ],
+                            "Resource": [
+                                "arn:aws:s3:::twitter-dashboard-ysano-01",
+                                "arn:aws:s3:::twitter-dashboard-ysano-01/*"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Resource": [
+                                "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "firehose:ListDeliveryStreams",
+                                "firehose:PutRecord",
+                                "firehose:PutRecordBatch"
+                            ],
+                            "Resource": [
+                                "arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/Twitter-Dashboard-Entities",
+                                "arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/Twitter-Dashboard-Sentiment"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "comprehend:DetectEntities",
+                                "comprehend:DetectSentiment"
+                            ],
+                            "Resource": "*"
+                        }
+                    ]
+                }
+
