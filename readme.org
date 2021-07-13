@@ -1,0 +1,106 @@
+#+OPTIONS: H:3 num:t toc:t ^:nil tex:t
+#+TITLE: Tweet Analytics
+* About
+
+  Tweet の分析(感情など)
+
+* 手順
+
+** Twitter Developer Platform で App 作成
+
+   [[https://developer.twitter.com/en/portal/dashboard][Twitter Developer Platform]] で App を作る。
+   - Access token
+   - Access token secret
+   審査があるので説明は詳しく書く。
+
+** データストアを作る
+
+*** AWS S3 bucket を作る
+
+    - raw
+    - sentiment
+    - entities
+
+*** AWS Kinesis Data Firehose 用 IAM Policy&Role 作成
+
+    - Policy: Tweet-Dashboard-Firehose
+      - S3 bucket の List,Read,Write Action
+      - CloudWatch Logs の List,Write Action
+
+    - Role: Tweet-Dashboard-Firehose-Policy
+
+*** AWS Kinesis Data Firehose の作成
+
+    - Create Delivery Stream in {raw/,sentiment/,entities/}
+      - Tweet-Dashboard-$prefix とする
+      - S3 bucket ARN + prefix: $prefix
+      - Buffer conditions: Interval 60sec
+
+*** AWS Secrets Manager に Twitter App の secret を設定
+
+    - TwitteAPI-Secrets を Generate する
+      - ConsumerApiKey
+      - ConsumerApiSecret
+      - AccessToken
+      - AccessTokenSecret
+
+*** AWS CloudFormation で VPC を作成
+
+    - Network gateway, routing, IAM policy など IaC で
+    - yaml
+      - [[file:deployment/ec2_vps.yaml][ec2_vpc.yaml]]
+      - [[file:deployment/vpc_iam.yaml][vpc_iam.yaml]]
+
+*** AWS EC2 にて Instance 作成
+
+    - Spec
+      - t4g.nano
+    - 設定
+      - npm init
+      - npm install aws-sdk twitter-lite
+    - node [[file:twitter_reader.js][twitter_reader.js]] を systemd で回す
+      - /etc/systemd/system に twrd.service を配置
+      - systemctl enable twrd
+      - systemctl start twrd
+    - S3 bucket raw/ にデータが溜まっていく
+
+** 分析システムを構築
+
+*** AWS Lambda 用 IAM 作成
+
+    - TweetAnalysisLambdaFunctionRole
+    - TweetAnalysisLambdaFunctionPolicy
+    - [[file:deployment/lambda_iam.yaml][lambda_iam.yaml]]
+
+*** AWS Lambda
+    - [[file:tweet_analysis/lambda_function.py][lambda_function.py]]
+      - S3 bucket を Comprehend にわたす
+      - Delivery Stream Name については SENTIMENT_STREAM, ENTITY_STREAM 環境変数にて渡
+    - TweetAnalysisLambdaFunctionRole をつける
+    - Timeout 5min
+    - S3 bucket sentiment, entities に結果が蓄積される
+
+** 可視化
+
+*** AWS Glue にて Metadata catalog 作成
+
+    - 動的フレーム作成(Spark と違い初期 Schema 不要)
+    - [[file:deployment/glue_table.yaml][glue_table.yaml]]
+    - Database: twitter_timeline_dashboard
+      - tweets
+      - tweet_sentiments
+      - tweet_entities
+
+*** Amazon Athena でクエリ実行
+
+    - s3://twitter_timeline_dashboard/
+
+    #+begin_src sql
+        select * from tweet_sentiments limit 10;
+        select * from tweet_entities limit 10;
+    #+end_src
+    
+*** Amazon QuickSight
+
+    - S3 bucket を選択
+    - 分析を作成
