@@ -2,8 +2,14 @@
 #+TITLE: Tweet Analytics
 * About
 
-  Tweet の分析(感情など)
+  - 指定 Timeline の Tweet の分析をする(感情など)
+  - AWS 上で構築する
 
+* 構成図
+
+#+ATTR_HTML: :width 640;
+[[./fig.png][file:./fig.png]]
+  
 * 手順
 
 ** Twitter Developer Platform で App 作成
@@ -48,7 +54,7 @@
 
     - Network gateway, routing, IAM policy など IaC で
     - yaml
-      - [[file:deployment/ec2_vps.yaml][ec2_vpc.yaml]]
+      - [[file:deployment/ec2_vpc.yaml][ec2_vpc.yaml]]
       - [[file:deployment/vpc_iam.yaml][vpc_iam.yaml]]
 
 *** AWS EC2 にて Instance 作成
